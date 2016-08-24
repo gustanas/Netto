@@ -1,4 +1,4 @@
-# Netto
+# Netto - ネット
 
 A tiny protocol-oriented network layer written in Swift
 
@@ -82,6 +82,40 @@ func queryUserEndpoint() {
 }
 ```
 
+## Custom actions
+
+If you want to set some default behaviour to your requests, use the *NettoActions* protocol:
+
+``` swift
+protocol NettoActions {
+    var setDefaultRequest: (NSMutableURLRequest -> Void)? { get }
+}
+
+extension Netto: NettoActions {
+    var setDefaultRequest: (NSMutableURLRequest -> Void)? { return
+        { request in
+            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.addValue("application/json", forHTTPHeaderField: "Accept")
+        }
+    }
+}
+```
+
+Other actions will be added in the future, like *willSendRequest*, *didReceiveResponse*, etc.
+
+Finally, you can also define custom behaviour only on specific requests, for example: 
+
+``` swift
+...
+let requestClosure: NSMutableURLRequest -> Void = { request in
+    guard let token = KeychainWrapper.stringForKey("bearer") else { return }
+    request.addValue(token, forHTTPHeaderField: "Authorization")
+}
+        
+ws.loadResource(resource, requestPlugin: requestClosure) { users, response, error in
+    // handle response
+}
+```
 
 
 
