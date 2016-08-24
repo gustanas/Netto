@@ -1,64 +1,11 @@
 //
-//  WebService.swift
-//  Ruby
+//  Netto.swift
 //
 //  Created by Gustavo Nascimento on 8/15/16.
 //  Copyright © 2016. All rights reserved.
 //
 
 import Foundation
-
-enum HttpMethod<Body> {
-    case get
-    case post(Body)
-}
-
-extension HttpMethod {
-    var method: String {
-        switch self {
-        case .get: return "GET"
-        case .post: return "POST"
-        }
-    }
-}
-
-
-protocol Target {
-    var baseURL: String { get }
-    var path: String { get }
-}
-
-// Swift 3 lowerCase enum
-enum Endpoint {
-    case user
-    case createUser
-    case confirmationCode
-}
-
-extension Endpoint: Target {
-    var baseURL: String {
-        return "http://localhost:8080/"
-    }
-    
-    var path: String {
-        switch self {
-        case .user:
-            return "user-information"
-        case .createUser:
-            return "user-information"
-        case .confirmationCode:
-            return "confirmation-code"
-        }
-    }
-}
-
-
-struct Resource<A> {
-    let endpoint: Endpoint
-    let method: HttpMethod<AnyObject>
-    let parser: AnyObject -> A?
-}
-
 
 class WebService {
     func loadResource<A>(resource: Resource<A>, requestPlugin: (NSMutableURLRequest -> Void)? = nil, completion: (A?,  NSURLResponse?, ErrorType?) -> ()) {
