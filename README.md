@@ -9,7 +9,6 @@ Define your different endpoints using an *enum*:
 ``` swift
 enum Endpoint {
     case user
-    case createUser
     case confirmationCode
 }
 ```
@@ -30,8 +29,6 @@ extension Endpoint: Path {
     var path: String {
         switch self {
         case .user:
-            return "user-information"
-        case .createUser:
             return "user-information"
         case .confirmationCode:
             return "confirmation-code"
@@ -68,7 +65,7 @@ extension User {
 
 func queryUserEndpoint() {
   let parameters = ["username": "test"]
-  let userResource = Resource<User>(endpoint: Endpoint.createUser, method: .post(parameters)) { json in
+  let userResource = Resource<User>(endpoint: Endpoint.user, method: .post(parameters)) { json in
     guard let dictionary = json as? [String: AnyObject] else { return nil }
     return User.init(dictionary: dictionary)
   }
