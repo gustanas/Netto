@@ -115,4 +115,7 @@ ws.loadResource(resource, requestPlugin: requestClosure) { users, response, erro
 ```
 
 
+Twitter: [@gusta_nas](https://twitter.com/gusta_nas)
+
+Website: [gustanas.co](http://www.gustanas.co/)
 
