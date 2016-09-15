@@ -9,6 +9,7 @@
 enum HttpMethod<Body> {
     case get
     case post(Body)
+    case head
 }
 
 extension HttpMethod {
@@ -16,6 +17,7 @@ extension HttpMethod {
         switch self {
         case .get: return "GET"
         case .post: return "POST"
+        case .head: return "HEAD"
         }
     }
 }
