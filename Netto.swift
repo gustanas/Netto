@@ -23,7 +23,7 @@ extension Netto: NettoActions {
 struct Netto {
     func loadResource<A>(resource: Resource<A>, requestPlugin: (NSMutableURLRequest -> Void)? = nil, completion: (A?,  NSURLResponse?, ErrorType?) -> ()) {
         let fullPath = "\(resource.endpoint.baseURL)\(resource.endpoint.path)"
-        let url = NSURL(string: fullPath)!
+        guard let url = NSURL(string: fullPath) else { return }
         let request = NSMutableURLRequest(URL: url)
 
         request.HTTPMethod = resource.method.method
