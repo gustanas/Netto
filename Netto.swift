@@ -8,12 +8,17 @@
 import Foundation
 
 protocol NettoActions {
-    var setDefaultRequest: (NSMutableURLRequest -> Void)? { get }
+    var setDefaultRequest: ((inout URLRequest) -> Void)? { get }
 }
 
 extension Netto: NettoActions {
-    var setDefaultRequest: (NSMutableURLRequest -> Void)? { return
+    var setDefaultRequest: ((inout URLRequest) -> Void)? { return
         { request in
+            
+            if let token = KeychainWrapper.stringForKey("bearer") {
+                request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            }
+            
             request.addValue("application/json", forHTTPHeaderField: "Content-Type")
             request.addValue("application/json", forHTTPHeaderField: "Accept")
         }
@@ -21,34 +26,33 @@ extension Netto: NettoActions {
 }
 
 struct Netto {
-    func loadResource<A>(resource: Resource<A>, requestPlugin: (NSMutableURLRequest -> Void)? = nil, completion: (A?,  NSURLResponse?, ErrorType?) -> ()) {
+    
+    func loadResource<A>(_ resource: Resource<A>, requestPlugin: ((URLRequest) -> Void)? = nil, completion: @escaping (A?,  URLResponse?, Error?) -> ()) {
+        
         let fullPath = "\(resource.endpoint.baseURL)\(resource.endpoint.path)"
-        guard let url = NSURL(string: fullPath) else { return }
-        let request = NSMutableURLRequest(URL: url)
-
-        request.HTTPMethod = resource.method.method
+        guard let url = URL(string: fullPath) else { return }
+        var request = URLRequest(url: url)
+        
+        request.httpMethod = resource.method.method
         if case let .post(json) = resource.method {
-            let data = try? NSJSONSerialization.dataWithJSONObject(json, options: [])
-            request.HTTPBody = data
+            let data = try? JSONSerialization.data(withJSONObject: json, options: [])
+            request.httpBody = data
         }
-
-
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("application/json", forHTTPHeaderField: "Accept")
-
+        
+        
+        setDefaultRequest?(&request)
+        
         // Customs parameters for request
-        if let uRequestPlugin = requestPlugin {
-            uRequestPlugin(request)
-        }
-
-        NSURLSession.sharedSession().dataTaskWithRequest(request) { (data, response, error) in
+        requestPlugin?(request)
+        
+        URLSession.shared.dataTask(with: request) { (data, response, error) in
             guard let data = data else {
                 completion(nil,response, error)
                 return
             }
 
-            let json = try? NSJSONSerialization.JSONObjectWithData(data, options: [])
-
+            let json = try? JSONSerialization.jsonObject(with: data, options: [])
+          
             let parsedObjects = json.flatMap(resource.parser)
             completion(parsedObjects, response, error)
         }.resume()
