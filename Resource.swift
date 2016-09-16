@@ -7,6 +7,6 @@
 
 struct Resource<A> {
     let endpoint: Endpoint
-    let method: HttpMethod<AnyObject>
-    let parser: AnyObject -> A?
+    let method: HttpMethod<Any>
+    let parser: Any -> A?
 }
