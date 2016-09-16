@@ -42,8 +42,8 @@ extension Endpoint: Path {
 ``` swift
 struct Resource<A> {
   let endpoint: Endpoint
-  let method: HttpMethod<AnyObject>
-  let parser: AnyObject -> A?
+  let method: HttpMethod<Any>
+  let parser: Any -> A?
 }
 ```
 
@@ -57,7 +57,7 @@ struct User {
 }
 
 extension User {
-    init?(dictionary: [String: AnyObject]) {
+    init?(dictionary: [String: Any]) {
         guard let username = dictionary["username"] as? String else { return nil }
         self.username = username
     }
@@ -66,7 +66,7 @@ extension User {
 func queryUserEndpoint() {
   let parameters = ["username": "test"]
   let userResource = Resource<User>(endpoint: Endpoint.user, method: .post(parameters)) { json in
-    guard let dictionary = json as? [String: AnyObject] else { return nil }
+    guard let dictionary = json as? [String: Any] else { return nil }
     return User.init(dictionary: dictionary)
   }
   
@@ -85,11 +85,11 @@ If you want to set some default behaviour to your requests, use the *NettoAction
 
 ``` swift
 protocol NettoActions {
-    var setDefaultRequest: (NSMutableURLRequest -> Void)? { get }
+    var setDefaultRequest: (inout URLRequest -> Void)? { get }
 }
 
 extension Netto: NettoActions {
-    var setDefaultRequest: (NSMutableURLRequest -> Void)? { return
+    var setDefaultRequest: (inout URLRequest -> Void)? { return
         { request in
             request.addValue("application/json", forHTTPHeaderField: "Content-Type")
             request.addValue("application/json", forHTTPHeaderField: "Accept")
@@ -104,7 +104,7 @@ Finally, you can also define custom behaviour only on specific requests, for exa
 
 ``` swift
 ...
-let requestClosure: NSMutableURLRequest -> Void = { request in
+let requestClosure: (inout URLRequest) -> Void = { request in
     guard let token = KeychainWrapper.stringForKey("bearer") else { return }
     request.addValue(token, forHTTPHeaderField: "Authorization")
 }
